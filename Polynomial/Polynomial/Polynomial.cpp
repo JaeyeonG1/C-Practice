@@ -97,7 +97,7 @@ public:
 		}
 	}
 	// 다항식 출력
-	void viewPloy() {
+	void viewPoly() {
 		for (int i = 0; i < current; i++) {
 			if (terms[i].getExp() == 0) {
 				cout << terms[i].getCoef() << endl;
@@ -149,7 +149,7 @@ int main() {
 			break;
 	}
 
-	poly1.viewPloy();
+	poly1.viewPoly();
 
 	cout << endl << "두번째 다항식을 입력하세요." << endl;
 
@@ -168,17 +168,17 @@ int main() {
 			break;
 	}
 	
-	poly2.viewPloy();
+	poly2.viewPoly();
 
 	
 	sum.sumPolys(poly1, poly2);
 	cout << endl << "합 = ";
-	sum.viewPloy();
+	sum.viewPoly();
 	
 	/*
 	sum = poly1.sumPoly(poly2);
 	cout << endl << "합 = ";
-	sum->viewPloy();
+	sum->viewPoly();
 
 	delete sum;
 	*/
