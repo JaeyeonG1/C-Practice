@@ -31,10 +31,10 @@ public:
 	bool getIslendable() {
 		return islendable;
 	}
-	Book* getPre(){
+	Book* getPre() {
 		return pre;
 	}
-	Book* getNext(){
+	Book* getNext() {
 		return next;
 	}
 	void setName(string name) {
@@ -62,6 +62,7 @@ public:
 	}
 	void addBook(string name) {
 		Book* temp = new Book(name);
+		Book* pre = new Book();
 		if (first == NULL) {
 			first = temp;
 		}
@@ -70,11 +71,22 @@ public:
 			if (current->getName().compare(temp->getName()) > 0) {
 				temp->setNext(current);
 				first = temp;
-				first->setPre(current);
+				current->setPre(first);
 				return;
 			}
-			while (current->getNext() != NULL) {
-				Book* pre = current;
+			else if (current->getName().compare(temp->getName()) == 0) {
+				cout << "이미 같은 이름의 도서가 존재합니다." << endl;
+				return;
+			}
+			else if (current->getName().compare(temp->getName()) < 0){
+				if (current->getNext() == NULL) {
+					current->setNext(temp);
+					temp->setPre(current);
+					return;
+				}
+			}
+			while (1) {
+				pre = current;
 				current = current->getNext();
 				if (current->getName().compare(temp->getName()) > 0) {
 					temp->setNext(current);
@@ -83,13 +95,93 @@ public:
 					temp->setPre(pre);
 					return;
 				}
+				else if (current->getName().compare(temp->getName()) == 0) {
+					cout << "이미 같은 이름의 도서가 존재합니다." << endl;
+					return;
+				}
+				if (current->getNext() == NULL) {
+					current->setNext(temp);
+					temp->setPre(current);
+					return;
+				}
 			}
-			current->setNext(temp);
-			temp->setPre(current);
 		}
 	}
 	void lendBook(string name) {
-
+		Book* current = first;
+		if (current->getName() == name) {
+			if (current->getIslendable()) {
+				current->setIslendable(false);
+				cout << current->getName() << " 대여 완료" << endl;
+				return;
+			}
+			else {
+				cout << "해당 도서가 이미 대여 중입니다." << endl;
+				return;
+			}
+		}
+		else {
+			if (current->getNext() == NULL) {
+				cout << "해당하는 도서가 없습니다." << endl;
+				return;
+			}
+			while (1) {
+				current = current->getNext();
+				if (current->getName() == name) {
+					if (current->getIslendable()) {
+						current->setIslendable(false);
+						cout << current->getName() << " 대여 완료" << endl;
+						return;
+					}
+					else {
+						cout << "해당 도서가 이미 대여 중입니다." << endl;
+						return;
+					}
+				}
+				if (current->getNext() == NULL) {
+					cout << "해당하는 도서가 없습니다." << endl;
+					return;
+				}
+			}
+		}
+	}
+	void returnBook(string name) {
+		Book* current = first;
+		if (current->getName() == name) {
+			if (current->getIslendable() == false) {
+				current->setIslendable(true);
+				cout << current->getName() << " 반납 완료" << endl;
+				return;
+			}
+			else {
+				cout << "대출 상태인 도서가 아닙니다." << endl;
+				return;
+			}
+		}
+		else {
+			if (current->getNext() == NULL) {
+				cout << "해당하는 도서가 없습니다." << endl;
+				return;
+			}
+			while (1) {
+				current = current->getNext();
+				if (current->getName() == name) {
+					if (current->getIslendable() == false) {
+						current->setIslendable(false);
+						cout << current->getName() << " 반납 완료" << endl;
+						return;
+					}
+					else {
+						cout << "대출 상태인 도서가 아닙니다." << endl;
+						return;
+					}
+				}
+				if (current->getNext() == NULL) {
+					cout << "해당하는 도서가 없습니다." << endl;
+					return;
+				}
+			}
+		}
 	}
 	void printBooks() {
 		if (first == NULL) {
@@ -104,7 +196,7 @@ public:
 				else
 					stat = "대출중";
 
-				cout << "도서명 : " << current->getName() << " | 상태 : " << stat << endl;
+				cout << "| 도서명 : " << current->getName() << " | 상태 : " << stat << " |" << endl;
 				current = current->getNext();
 
 				if (current == NULL)
@@ -126,29 +218,73 @@ public:
 					break;
 			}
 			while (1) {
-				if (current->getIslendable() == true)
+				if (current->getIslendable())
 					stat = "대출 가능";
 				else
 					stat = "대출중";
 
-				cout << "도서명 : " << current->getName() << " | 상태 : " << stat << endl;
-				current = current->getPre();
+				cout << "| 도서명 : " << current->getName() << " | 상태 : " << stat << " |" << endl;
 
-				if (current == NULL)
+				if (current->getPre() == NULL)
 					return;
+
+				current = current->getPre();
 			}
 		}
 	}
-	void returnBook(string name) {
-
-	}
 	void deleteBook(string name) {
-
+		Book* current = first;
+		if (first->getName() == name) {
+			if (current->getIslendable()) {
+				first = first->getNext();
+				current->setNext(NULL);
+				first->setPre(NULL);
+				delete current;
+				cout << name << "이 삭제되었습니다." << endl;
+			}
+			else
+				cout << "해당 도서가 대여중입니다. 대여중인 도서는 삭제할 수 없습니다." << endl;
+		}
+		else {
+			if (current->getNext() == NULL) {
+				cout << "해당하는 도서가 없습니다." << endl;
+				return;
+			}
+			while (1) {
+				current = current->getNext();
+				if (current->getName() == name) {
+					if (current->getIslendable()) {
+						if (current->getNext() == NULL) {
+							current->getPre()->setNext(NULL);
+							current->setPre(NULL);
+							delete current;
+						}
+						else {
+							current->getPre()->setNext(current->getNext());
+							current->getNext()->setPre(current->getPre());
+							current->setPre(NULL);
+							current->setNext(NULL);
+							delete current;
+						}
+						cout << name << "이 삭제되었습니다." << endl;
+						return;
+					}
+					else {
+						cout << "해당 도서가 대여중입니다. 대여중인 도서는 삭제할 수 없습니다." << endl;
+						return;
+					}
+				}
+				if (current->getNext() == NULL) {
+					cout << "해당하는 도서가 없습니다." << endl;
+					return;
+				}
+			}
+		}
 	}
 };
 
 int main() {
-	BookList bl;
+	BookList bl = BookList();
 	string name = "";
 	int menu;
 
@@ -161,19 +297,27 @@ int main() {
 		cout << "5. 반납" << endl;
 		cout << "6. 도서 삭제" << endl;
 		cout << "7. 종료" << endl;
-		
+
 		cin >> menu;
 
-		switch(menu){
+		switch (menu) {
 		case 1:
-			cout << "등록할 도서 명 : ";
-			cin >> name;
-			bl.addBook(name);
+			while (1) {
+				cout << "등록할 도서 명 : ";
+				cin >> name;
+				if (name == "exit")
+					break;
+				bl.addBook(name);
+			}
 			break;
 		case 2:
-			cout << "대출할 도서 명 : ";
-			cin >> name;
-			bl.addBook(name);
+			while (1) {
+				cout << "대출할 도서 명 : ";
+				cin >> name;
+				if (name == "exit")
+					break;
+				bl.lendBook(name);
+			}
 			break;
 		case 3:
 			bl.printBooks();
@@ -182,14 +326,22 @@ int main() {
 			bl.reversePrintBooks();
 			break;
 		case 5:
-			cout << "반납할 도서명 : ";
-			cin >> name;
-			bl.returnBook(name);
+			while (1) {
+				cout << "반납할 도서명 : ";
+				cin >> name;
+				if (name == "exit")
+					break;
+				bl.returnBook(name);
+			}
 			break;
 		case 6:
-			cout << "삭제할 도서명 : ";
-			cin >> name;
-			bl.deleteBook(name);
+			while (1) {
+				cout << "삭제할 도서명 : ";
+				cin >> name;
+				if (name == "exit")
+					break;
+				bl.deleteBook(name);
+			}
 			break;
 		case 7:
 			cout << "프로그램을 종료합니다." << endl;
