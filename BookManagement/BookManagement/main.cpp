@@ -303,7 +303,7 @@ int main() {
 		switch (menu) {
 		case 1:
 			while (1) {
-				cout << "등록할 도서 명 : ";
+				cout << "등록할 도서 명 (종료 exit) : ";
 				cin >> name;
 				if (name == "exit")
 					break;
@@ -312,7 +312,7 @@ int main() {
 			break;
 		case 2:
 			while (1) {
-				cout << "대출할 도서 명 : ";
+				cout << "대출할 도서 명 (종료 exit) : ";
 				cin >> name;
 				if (name == "exit")
 					break;
@@ -327,7 +327,7 @@ int main() {
 			break;
 		case 5:
 			while (1) {
-				cout << "반납할 도서명 : ";
+				cout << "반납할 도서명 (종료 exit) : ";
 				cin >> name;
 				if (name == "exit")
 					break;
@@ -336,7 +336,7 @@ int main() {
 			break;
 		case 6:
 			while (1) {
-				cout << "삭제할 도서명 : ";
+				cout << "삭제할 도서명 (종료 exit) : ";
 				cin >> name;
 				if (name == "exit")
 					break;

@@ -88,74 +88,6 @@ public:
 
 		return token;
 	}
-	/*
-	void tokenizer(string exp) {
-		string num = "";
-		string op = "";
-		for (int i = 0; i < exp.length(); i++) {
-			if (isDigit(exp.substr(i, 1))) {
-				num += exp.substr(i, 1);
-			}
-			else {
-				op = exp.substr(i, 1);
-
-				oprnd.push(atoi(num.c_str()));
-				oprtr.push(op);
-
-				exp = exp.substr(i + 1, string::npos);
-
-				break;
-			}
-		}
-		while (1) {
-			int operand;
-			num = "";
-			for (int i = 0; i < exp.length(); i++) {
-				if (isDigit(exp.substr(i, 1))) {
-					num += exp.substr(i, 1);
-				}
-				else {
-					op = exp.substr(i, 1);
-
-					oprnd.push(atoi(num.c_str()));
-
-					string preOp = oprtr.pop();
-					if (getPriority(op) <= getPriority(preOp)) {
-						oprtr.push(preOp);
-
-						operand = oprnd.pop();
-						output.insert(pos, to_string(operand) + " ");
-
-						output += oprtr.pop() + " ";
-
-						operand = oprnd.pop();
-						output.insert(pos, to_string(operand) + " ");
-
-						pos = output.length();
-						oprtr.push(op);
-					}
-					else {
-						oprtr.push(preOp);
-						oprtr.push(op);
-					}
-
-					exp = exp.substr(i + 1, string::npos);
-
-					break;
-				}
-			}
-			if (num.length() == exp.length() && num.compare(exp) == 0) {
-				oprnd.push(atoi(num.c_str()));
-				operand = oprnd.pop();
-				output.insert(pos, to_string(operand) + " ");
-				output += op;
-				operand = oprnd.pop();
-				output.insert(pos, to_string(operand) + " ");
-				break;
-			}
-		}
-	}
-	*/
 };
 
 class Calculator {
@@ -171,42 +103,60 @@ public:
 	~Calculator() {}
 	void inputExp(string exp) {
 		this->exp = exp;
-		calculate();
 	}
 	int getPriority(string op) {
 		char opr[1];
 		strcpy_s(opr, op.c_str());
 
 		switch (opr[0]) {
+		case '^':
+			return 2;
 		case '*':
-			return 1;
+			return 3;
 		case '/':
-			return 1;
+			return 3;
 		case '%':
-			return 1;
+			return 3;
 		case '+':
-			return 2;
+			return 4;
 		case '-':
-			return 2;
+			return 4;
+		case '(':
+			return 0;
+		case ')':
+			return 1;
 		default:
 			return -1;
 		}
 	}
-	void covertToPostfix() {
+	void infixToPostfix() {
 		tknzr.inputString(exp);
-		string token = tknzr.getNext();
+		string token;
+		string pre = "";
+
 		while (tknzr.next()) {
 			token = tknzr.getNext();
 			if (isDigit(token)) {
-				oprnd.push(atoi(token.c_str()));
+				postfix += (token + " ");
 			}
 			else {
-				oprtr.push(token);
+				if ((pre == "" || isDigit(pre) == false) && getPriority(token) == 4) {
+					postfix += token;
+				}
+				else {
+					if (pre == "") {
+						oprtr.push(token);
+						pre = token;
+					}
+					else {
+						string tempOp = oprtr.pop();
+						if (getPriority(tempOp) <= getPriority(token)) {
+
+						}
+					}
+				}
 			}
 		}
-	}
-	void getResult() {
-
 	}
 	void calculate() {
 
@@ -227,17 +177,16 @@ int main() {
 	string expression;
 	Calculator cal;
 
-	Stack<int> a;
-	a.pop();
-
 	cout << "중위 표현 계산식을 입력하세요 : ";
 	cin >> expression;
 
-
-	/*
 	cal.inputExp(expression);
+
+	cal.infixToPostfix();
+	cal.calculate();
+	
 	cal.printPostfix();
 	cal.printResult();
-	*/
+
 	return 0;
 }
