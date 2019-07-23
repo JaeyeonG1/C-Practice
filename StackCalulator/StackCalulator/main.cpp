@@ -88,6 +88,16 @@ public:
 
 		return token;
 	}
+	// 토큰을 원하는 기준으로 나눠 반환해 주는 함수
+	string getNext(string delimiter) {
+		string token = "";
+
+		int delPos = original.find(delimiter);
+		token = original.substr(0, delPos);
+		original = original.substr(delPos + 1, string::npos);
+
+		return token;
+	}
 };
 
 class Calculator {
@@ -110,21 +120,21 @@ public:
 
 		switch (opr[0]) {
 		case '^':
-			return 2;
-		case '*':
-			return 3;
-		case '/':
-			return 3;
-		case '%':
-			return 3;
-		case '+':
-			return 4;
-		case '-':
-			return 4;
-		case '(':
 			return 0;
-		case ')':
+		case '*':
 			return 1;
+		case '/':
+			return 1;
+		case '%':
+			return 1;
+		case '+':
+			return 2;
+		case '-':
+			return 2;
+		case '(':
+			return 3;
+		case ')':
+			return 4;
 		default:
 			return -1;
 		}
@@ -133,6 +143,7 @@ public:
 		tknzr.inputString(exp);
 		string token;
 		int opCount = 1;
+		int brktCount = 0;
 
 		while (tknzr.next()) {
 			token = tknzr.getNext();
@@ -141,7 +152,27 @@ public:
 				opCount = 0;
 			}
 			else {
-				if (opCount != 0 && getPriority(token) != 4) {
+				if (getPriority(token) == 3){
+					oprtr.push(token);
+					brktCount++;
+					opCount--;
+				}
+				else if (getPriority(token) == 4) {
+					if (brktCount < 1) {
+						cout << "잘못된 식 입력 (여는 괄호 없음)" << endl;
+						return;
+					}
+					while (1) {
+						string temp = oprtr.pop();
+						if (getPriority(temp) == 3) {
+							brktCount--;
+							break;
+						}
+						postfix += (temp + " ");
+					}
+					opCount = -1;
+				}
+				else if (opCount != 0 && getPriority(token) != 2) {
 					cout << "잘못된 식 입력 (부호 자리에 잘못된 기호)" << endl;
 					return;
 				}
@@ -149,7 +180,7 @@ public:
 					cout << "잘못된 식 입력 (연산자 위치 오류)" << endl;
 					return;
 				}
-				else if (opCount == 1 && getPriority(token) == 4) {
+				else if (opCount == 1 && getPriority(token) == 2) {
 					postfix += token;
 				}
 				else{
@@ -161,7 +192,6 @@ public:
 						int comparer = 0;
 						if (getPriority(tempOp) <= getPriority(token)) {
 							while (getPriority(tempOp) <= getPriority(token)) {
-								cout << tempOp << endl;
 								postfix += (tempOp + " ");
 								if (oprtr.getTop() == -1) {
 									comparer = 1;
@@ -181,14 +211,83 @@ public:
 				}
 				opCount++;
 			}
-			cout << postfix << endl;
 		}
 		while (oprtr.getTop() > -1) {
-			postfix += (oprtr.pop() + " ");
+			string temp = oprtr.pop();
+			if (getPriority(temp) == 3) {
+				cout << "잘못된 식 입력 (닫는 괄호 없음)" << endl;
+				return;
+			}
+			postfix += (temp + " ");
 		}
+		printPostfix();
 	}
 	void calculate() {
+		tknzr.inputString(postfix);
+		string token;
+		int value;
+		int count;
 
+		while (tknzr.next()) {
+			token = tknzr.getNext(" ");
+
+			if (isDigit(token)) {
+				int temp = atoi(token.c_str());
+				oprnd.push(temp);
+			}
+			else {
+				int rNum = oprnd.pop();
+				int lNum = oprnd.pop();
+				char op[2];
+				strcpy_s(op, token.c_str());
+
+				switch (op[0]) {
+				case '^':
+					count = 0;
+					value = 1;
+
+					while (count < rNum) {
+						value *= lNum;
+						count++;
+					}
+					oprnd.push(value);
+
+					break;
+				case '*':
+					value = lNum * rNum;
+					oprnd.push(value);
+
+					break;
+				case '/':
+					value = lNum / rNum;
+					oprnd.push(value);
+
+					break;
+				case '%':
+					value = lNum % rNum;
+					oprnd.push(value);
+
+					break;
+				case '+':
+
+					value = lNum + rNum;
+					oprnd.push(value);
+
+					break;
+				case '-':
+
+					value = lNum - rNum;
+					oprnd.push(value);
+
+					break;
+				default:
+					break;
+				}
+			}
+		}
+		result = oprnd.pop();
+
+		printResult();
 	}
 	void printPostfix() {
 		cout << "후위 표현 계산식 : " << postfix << endl;
@@ -205,7 +304,6 @@ bool isDigit(string s) {
 int main() {
 	string expression;
 	Calculator cal;
-	Tokenizer tk;
 
 	cout << "중위 표현 계산식을 입력하세요 : ";
 	cin >> expression;
@@ -213,10 +311,7 @@ int main() {
 	cal.inputExp(expression);
 
 	cal.infixToPostfix();
-	//cal.calculate();
-	
-	cal.printPostfix();
-	//cal.printResult();
+	cal.calculate();
 
 	return 0;
 }
