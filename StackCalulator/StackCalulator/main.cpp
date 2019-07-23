@@ -105,7 +105,7 @@ public:
 		this->exp = exp;
 	}
 	int getPriority(string op) {
-		char opr[1];
+		char opr[2];
 		strcpy_s(opr, op.c_str());
 
 		switch (opr[0]) {
@@ -132,30 +132,59 @@ public:
 	void infixToPostfix() {
 		tknzr.inputString(exp);
 		string token;
-		string pre = "";
+		int opCount = 1;
 
 		while (tknzr.next()) {
 			token = tknzr.getNext();
 			if (isDigit(token)) {
 				postfix += (token + " ");
+				opCount = 0;
 			}
 			else {
-				if ((pre == "" || isDigit(pre) == false) && getPriority(token) == 4) {
+				if (opCount != 0 && getPriority(token) != 4) {
+					cout << "잘못된 식 입력 (부호 자리에 잘못된 기호)" << endl;
+					return;
+				}
+				else if (opCount > 1) {
+					cout << "잘못된 식 입력 (연산자 위치 오류)" << endl;
+					return;
+				}
+				else if (opCount == 1 && getPriority(token) == 4) {
 					postfix += token;
 				}
-				else {
-					if (pre == "") {
+				else{
+					if (oprtr.getTop() == -1) {
 						oprtr.push(token);
-						pre = token;
 					}
 					else {
 						string tempOp = oprtr.pop();
+						int comparer = 0;
 						if (getPriority(tempOp) <= getPriority(token)) {
-
+							while (getPriority(tempOp) <= getPriority(token)) {
+								cout << tempOp << endl;
+								postfix += (tempOp + " ");
+								if (oprtr.getTop() == -1) {
+									comparer = 1;
+									break;
+								}
+								tempOp = oprtr.pop();
+							}
+							if (comparer == 0) {
+								oprtr.push(tempOp);
+							}
 						}
+						else {
+							oprtr.push(tempOp);
+						}
+						oprtr.push(token);
 					}
 				}
+				opCount++;
 			}
+			cout << postfix << endl;
+		}
+		while (oprtr.getTop() > -1) {
+			postfix += (oprtr.pop() + " ");
 		}
 	}
 	void calculate() {
@@ -176,6 +205,7 @@ bool isDigit(string s) {
 int main() {
 	string expression;
 	Calculator cal;
+	Tokenizer tk;
 
 	cout << "중위 표현 계산식을 입력하세요 : ";
 	cin >> expression;
@@ -183,10 +213,10 @@ int main() {
 	cal.inputExp(expression);
 
 	cal.infixToPostfix();
-	cal.calculate();
+	//cal.calculate();
 	
 	cal.printPostfix();
-	cal.printResult();
+	//cal.printResult();
 
 	return 0;
 }
